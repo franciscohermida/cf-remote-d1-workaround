@@ -24,11 +24,7 @@ Step by step with workaround:
 - run `pnpm db:migration:apply --remote` to apply the new migration to the remote database
 - run `pnpm db:snapshot` to log the results indicating the problem with d1 migrations
 
-
-db:reset or db:seed with --local or --remote flag
-
 Other problems with prisma + d1:
-
 - There is no diff method for remote d1 databases. So you have to migrate locally and remote to generate scripts to apply to the remote database.
 - It is necessary to have a local database even if its not used, because the local database is used to generate the scripts to apply to the remote database.
 - I had to use cloudflare vite plugin to start the dev server, because wrangler dev was causing this error:
