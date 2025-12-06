@@ -1,0 +1,10 @@
+PRAGMA defer_foreign_keys = true;
+
+DROP TABLE IF EXISTS "PostTag";
+DROP TABLE IF EXISTS "Comment";
+DROP TABLE IF EXISTS "Post";
+DROP TABLE IF EXISTS "Tag";
+DROP TABLE IF EXISTS "User";
+DROP TABLE IF EXISTS "d1_migrations";
+
+
