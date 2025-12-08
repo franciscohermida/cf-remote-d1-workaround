@@ -14,12 +14,24 @@ export default {
 		const url = new URL(request.url);
 
 		if (url.pathname === '/snapshot') {
+			const users = await prisma.user.count();
 			const posts = await prisma.post.count();
 
 			// Expectations (hard-coded for the test setup)
+			const expectedUsers = 2;
 			const expectedPosts = 3;
 
-			const lines = [`expected posts: ${expectedPosts}, found: ${posts}`];
+			const lines = [
+				"",
+				"",
+				"",
+				'############ snapshot ############',
+				`user count expected: ${expectedUsers}, found: ${users}`,
+				`expected posts: ${expectedPosts}, found: ${posts}`,
+				"",
+				"",
+				"",
+			];
 
 			return new Response(lines.join('\n'), {
 				status: 200,
