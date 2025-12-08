@@ -14,14 +14,12 @@ Step by step without workaround:
 Step by step with workaround:
 - run `pnpm db:reset --local` to reset the local database
 - run `pnpm db:reset --remote` to reset the remote database
-- rename `0002_change-user.sql` back to `0002_change-user.sql_` so we can isolate the first migration
-- run `pnpm db:migration:apply --local` we need to keep the local database up to date with the remote database so we can create the diff scripts
+- run `pnpm db:migration:apply --local` we need to keep the local database up to date with the remote database so we can create the diff scripts (I don't understand what you mean by "diff scripts" here -- alsuren)
 - run `pnpm db:migration:apply:workaround ./prisma/migrations/0001_init.sql` alternative apply script that uses execute and manually writes to migration history to keep track of the migrations
 - run `pnpm db:seed --remote` to seed the remote database
-- run `pnpm db:snapshot` to log the correct results
-- rename `0002_change-user.sql_` to `0002_change-user.sql`
-- run `pnpm db:migration:apply --local` local sync
-- run `pnpm db:migration:apply --remote` to apply the new migration to the remote database
+- run `pnpm db:snapshot` to log the correct results (I changed this script to `wrangler d1 export --remote` to stdout, because this only seemed to be exercising the local db, which I expect to be broken -- alsuren)
+- run `pnpm db:migration:apply --local` local sync (Note that this will still run inside a transaction, so sqlite will silently ignore the `PRAGMA foreign_keys=OFF` line and do a cascading delete locally. If you want this to work then you will need to check that there is nothing running, then make a backup of .wrangler/state/v3/d1/ then use `sqlite3 .wrangler/state/v3/d1/miniflare-D1DatabaseObject/*.sqlite --cmd '.read ./prisma/migrations/0002_change-user.sql` or prisma's tooling to apply the migration without a transaction, and roll back if it fails -- alsuren)
+- run `pnpm db:migration:apply:workaround ./prisma/migrations/0002_change-user.sql` to apply the new migration to the remote database (this is the migration that needs to be run with the workaround. `pnpm db:migration:apply --remote` will break things here)
 - run `pnpm db:snapshot` to log the results indicating the problem with d1 migrations
 
 Other problems with prisma + d1:
