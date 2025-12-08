@@ -17,7 +17,7 @@
 		"db:seed": "wrangler d1 execute proto-remote-migration --file scripts/seed-sample.sql",
 		"db:reset": "wrangler d1 execute proto-remote-migration --file scripts/reset-tables.sql",
 		"db:generate": "prisma generate --schema ./prisma/schema.prisma",
-		"db:snapshot": "node scripts/fetch-snapshot.ts"
+		"db:snapshot": "pnpx wrangler d1 export --remote proto-remote-migration --output=/dev/stdout"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.17.0",
