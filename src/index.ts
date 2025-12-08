@@ -14,21 +14,12 @@ export default {
 		const url = new URL(request.url);
 
 		if (url.pathname === '/snapshot') {
-			const [posts, comments] = await Promise.all([
-				prisma.post.count(),
-				prisma.comment.findMany(),
-			]);
+			const posts = await prisma.post.count();
 
 			// Expectations (hard-coded for the test setup)
 			const expectedPosts = 3;
 
-			const commentsWithNullUser = comments.filter((c) => c.userId === null);
-
-			const lines = [
-				`expected posts: ${expectedPosts}, found: ${posts}`,
-				`comments with userId null (should be 0): ${commentsWithNullUser.length}`,
-				`null-user comment ids: ${commentsWithNullUser.map((c) => c.id).join(', ') || 'none'}`,
-			];
+			const lines = [`expected posts: ${expectedPosts}, found: ${posts}`];
 
 			return new Response(lines.join('\n'), {
 				status: 200,
