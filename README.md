@@ -2,7 +2,7 @@
 
 Based alsuren's comment on this issue: https://github.com/cloudflare/workers-sdk/issues/5438#issuecomment-3601587321
 
-Using remote D1 for development. Local-only note below.
+Using remote D1 for development. For local dev check note below.
 
 This uses Prisma but the workaround is ORM agnostic, the same applies to Drizzle.
 
