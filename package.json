@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
+		"dev": "vite dev",
 		"start": "wrangler dev",
 		"test": "vitest",
 		"cf-typegen": "wrangler types",
@@ -13,12 +13,12 @@
 		"db:migration:script:empty": "prisma migrate diff --from-empty --to-schema ./prisma/schema.prisma --script --output ",
 		"db:migration:script": "prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --script --output ",
 		"db:migration:apply": "wrangler d1 migrations apply proto-remote-migration",
-		"db:migration:apply:workaround": "node scripts/apply-migration.ts",
+		"db:migration:apply:workaround": "node ./scripts/apply-migration.ts proto-remote-migration",
 		"db:seed": "wrangler d1 execute proto-remote-migration --file scripts/seed-sample.sql",
 		"db:reset": "wrangler d1 execute proto-remote-migration --file scripts/reset-tables.sql",
 		"db:generate": "prisma generate --schema ./prisma/schema.prisma",
 		"db:snapshot": "node scripts/fetch-snapshot.ts",
-		"db:snapshot:export": "wrangler d1 export --remote proto-remote-migration --output=./dev/stdout"
+		"db:snapshot:export": "wrangler d1 export proto-remote-migration --output=./dev/stdout"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.17.0",

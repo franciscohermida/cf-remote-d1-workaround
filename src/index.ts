@@ -7,7 +7,6 @@ export interface Env {
 
 export default {
 	async fetch(request, env, ctx): Promise<Response> {
-		console.log('z fetch', request.url);
 		const adapter = new PrismaD1(env.DB);
 		const prisma = new PrismaClient({ adapter });
 
