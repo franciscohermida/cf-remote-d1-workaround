@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
-import execa from 'execa';
+import { execaSync } from 'execa';
 
 export type Mode = 'local' | 'remote';
 
@@ -29,24 +29,34 @@ export function fetchAppliedMigrations(mode: Mode, dbName: string): string[] {
 	const historyQuery = `${HISTORY_TABLE_SQL} SELECT name FROM d1_migrations ORDER BY id;`;
 
 	if (mode === 'remote') {
-		const res = execa.sync('wrangler', ['d1', 'execute', dbName, '--remote', '--command', historyQuery, '--json'], {
+		const res = execaSync('wrangler', ['d1', 'execute', dbName, '--remote', '--command', historyQuery, '--json'], {
 			preferLocal: true,
 		});
 
-		const rows = JSON.parse(res.stdout || '[]');
-		if (!Array.isArray(rows)) return [];
-		return rows.map((row: any) => row?.name).filter((name: any): name is string => typeof name === 'string');
+		// Parse wrangler output - it returns an array of results (one per SQL statement)
+		const results = JSON.parse(res.stdout || '[]');
+
+		// results[0] = CREATE TABLE statement (no rows)
+		// results[1] = SELECT statement (has migration names)
+		if (!Array.isArray(results) || results.length < 2) return [];
+
+		const selectResult = results[1];
+		if (!selectResult || !Array.isArray(selectResult.results)) return [];
+
+		return selectResult.results
+			.map((row: { name?: string }) => row?.name)
+			.filter((name: string | undefined): name is string => typeof name === 'string');
 	}
 
 	// Local path
 	const sqliteFile = getLocalSqliteFile();
 
 	// Ensure history table exists before selecting
-	execa.sync('sqlite3', [sqliteFile, HISTORY_TABLE_SQL], {
+	execaSync('sqlite3', [sqliteFile, HISTORY_TABLE_SQL], {
 		stdio: 'inherit',
 	});
 
-	const res = execa.sync('sqlite3', ['-json', sqliteFile, 'SELECT name FROM d1_migrations ORDER BY id;'], {
+	const res = execaSync('sqlite3', ['-json', sqliteFile, 'SELECT name FROM d1_migrations ORDER BY id;'], {
 		stdio: 'pipe',
 	});
 
@@ -62,13 +72,13 @@ export function applyMigrationFile(mode: Mode, filePath: string, dbName: string)
 
 	if (mode === 'remote') {
 		// Apply migration file to remote D1
-		execa.sync('wrangler', ['d1', 'execute', dbName, '--remote', '--file', filePath], {
+		execaSync('wrangler', ['d1', 'execute', dbName, '--remote', '--file', filePath], {
 			stdio: 'inherit',
 			preferLocal: true,
 		});
 
 		// Record migration history remotely
-		execa.sync('wrangler', ['d1', 'execute', dbName, '--remote', '--command', historyInsertSql], {
+		execaSync('wrangler', ['d1', 'execute', dbName, '--remote', '--command', historyInsertSql], {
 			stdio: 'inherit',
 			preferLocal: true,
 		});
@@ -79,11 +89,11 @@ export function applyMigrationFile(mode: Mode, filePath: string, dbName: string)
 
 	const dotReadArg = `.read ${filePath}`;
 
-	execa.sync('sqlite3', [sqliteFile, dotReadArg], {
+	execaSync('sqlite3', [sqliteFile, dotReadArg], {
 		stdio: 'inherit',
 	});
 
-	execa.sync('sqlite3', [sqliteFile, historyInsertSql], {
+	execaSync('sqlite3', [sqliteFile, historyInsertSql], {
 		stdio: 'inherit',
 	});
 }
